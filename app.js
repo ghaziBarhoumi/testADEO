@@ -3,6 +3,7 @@ const data = require('./data');
 'use strict'
 
 const args = process.argv
+var output = true
 
 function isEmpty(arr) {
     return (Array.isArray(arr) && arr.length)
@@ -11,7 +12,7 @@ function isEmpty(arr) {
 // This function filters out every animal that does not match the string pattern
 const removeNonMatching = (searchedStr, person) => {
     return person.animals.map((animal) => {
-        if (animal.name.includes(searchedStr)) {
+        if (animal.name.toLowerCase().includes(searchedStr.toLowerCase())) {
             return animal;
         }
     }).filter(e => e)
@@ -33,12 +34,16 @@ const filter = (searchedStr) => {
     });
 
     // prints out the filtered list if there is any match
-    console.log((!isEmpty(newList)) ? 'Nothing found' : JSON.stringify(newList))
+    if (output) {
+        console.log((!isEmpty(newList)) ? 'Nothing found' : JSON.stringify(newList))
+    }
     return (!isEmpty(newList)) ? 'Nothing found' : JSON.stringify(newList)
 }
 
-const count = () => {
-    const newList = data.map((country) => {
+const count = (list) => {
+    let dataList
+    list?  dataList = list : dataList = data
+    const newList = dataList.map((country) => {
         country.people.map((person) => {
             person.name = `${person.name} [${person.animals.length}]`
             return person
@@ -56,10 +61,27 @@ const count = () => {
 try {
     const cmd = args[2].split("=");
     if (cmd[0] === '--filter' || cmd[0] === 'filter') {
-        filter(cmd[1])
+        if(args[3]==='--count' || args[3]==='count')
+        {
+            output = false
+            let x = JSON.parse(filter(cmd[1]))
+            count(x);
+            output = true
+        } else filter(cmd[1])
     } else if (cmd[0] === '--count' || cmd[0] === 'count') {
-        count()
-    } else {
+        if (args[3]) {
+            const cmd2 = args[3].split("=")
+        if(cmd2[0]==='--filter' || cmd2[0]==='filter')
+        {
+            output = false
+            let x = JSON.parse(filter(cmd2[1]))
+            count(x)
+            output = true
+        }
+        } else 
+            count()
+        } else 
+        {
         console.log('Wrong arguments')
     }
 } catch(err) {
